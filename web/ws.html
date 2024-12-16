@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WebSocket Chat</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      #chat {
+        height: 300px;
+        border: 1px solid #ddd;
+        overflow-y: scroll;
+        margin-bottom: 10px;
+        padding: 10px;
+        background-color: #f4f4f4;
+      }
+      #message-form {
+        display: flex;
+        gap: 10px;
+      }
+      #message-input {
+        flex-grow: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>WebSocket Chat</h1>
+    <div id="chat"></div>
+
+    <form id="username-form">
+      <input
+        type="text"
+        id="username-input"
+        placeholder="Enter your username"
+        required
+      />
+      <button type="submit">Join Chat</button>
+    </form>
+
+    <form id="message-form" style="display: none">
+      <input
+        type="text"
+        id="message-input"
+        placeholder="Type a message"
+        required
+      />
+      <button type="submit">Send</button>
+    </form>
+
+    <script>
+      const usernameForm = document.getElementById("username-form");
+      const messageForm = document.getElementById("message-form");
+      const chatContainer = document.getElementById("chat");
+      const usernameInput = document.getElementById("username-input");
+      const messageInput = document.getElementById("message-input");
+      let socket;
+
+      usernameForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const username = usernameInput.value.trim();
+
+        if (username) {
+          socket = new WebSocket(
+            `http://localhost:8080/ws?username=${username}`
+          );
+
+          socket.onopen = function () {
+            usernameForm.style.display = "none";
+            messageForm.style.display = "flex";
+          };
+
+          socket.onmessage = function (event) {
+            const message = JSON.parse(event.data);
+            const messageElement = document.createElement("div");
+
+            if (message.username === "system") {
+              messageElement.style.fontStyle = "italic";
+              messageElement.style.color = "#888";
+            } else {
+              messageElement.innerHTML = `<strong>${message.username}:</strong> `;
+            }
+
+            messageElement.innerHTML += message.message;
+            chatContainer.appendChild(messageElement);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+          };
+
+          socket.onerror = function (error) {
+            console.error("WebSocket error:", error);
+          };
+
+          socket.onclose = function () {
+            const disconnectMessage = document.createElement("div");
+            disconnectMessage.style.fontStyle = "italic";
+            disconnectMessage.style.color = "#888";
+            disconnectMessage.textContent = "Disconnected from the server";
+            chatContainer.appendChild(disconnectMessage);
+          };
+        }
+      });
+
+      messageForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const message = messageInput.value.trim();
+
+        if (message && socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ message: message }));
+          messageInput.value = "";
+        }
+      });
+    </script>
+  </body>
+</html>

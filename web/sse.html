@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Server-Sent Events (SSE) Demo</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Server-Sent Events (SSE) Demo</h1>
+    <div id="events"></div>
+
+    <script>
+      const eventSource = new EventSource("http://localhost:8080/sse");
+      const eventsContainer = document.getElementById("events");
+
+      eventSource.onmessage = function (event) {
+        const newEvent = document.createElement("div");
+        newEvent.textContent = `Received at: ${event.data}`;
+        eventsContainer.appendChild(newEvent);
+      };
+
+      eventSource.onerror = function (error) {
+        console.error("EventSource failed:", error);
+        eventSource.close();
+      };
+    </script>
+  </body>
+</html>
