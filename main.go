@@ -29,6 +29,7 @@ func (s *APIServer) Start() error {
 	middleware := middleware.Cors(middleware.Logger(router))
 
 	server := &http.Server{
+
 		Addr:    s.addr,
 		Handler: middleware,
 	}
@@ -36,8 +37,6 @@ func (s *APIServer) Start() error {
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal("Error starting server:", err)
 	}
-
-	log.Printf("Starting API server at http://localhost:%s", s.addr)
 
 	return nil
 }
@@ -48,4 +47,5 @@ func main() {
 	if err := server.Start(); err != nil {
 		log.Fatal("Failed to start server:", err)
 	}
+	log.Printf("Starting API server at http://localhost:%s", port)
 }

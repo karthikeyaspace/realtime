@@ -19,7 +19,7 @@
 
       eventSource.onmessage = function (event) {
         const newEvent = document.createElement("div");
-        newEvent.textContent = `Received at: ${event.data}`;
+        newEvent.textContent = `${event.data}`;
         eventsContainer.appendChild(newEvent);
       };
 
